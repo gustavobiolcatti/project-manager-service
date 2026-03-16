@@ -1,14 +1,13 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
+import { DataSource } from "typeorm";
+import { addTransactionalDataSource } from "typeorm-transactional";
 
-import * as ProjectManagerDb from "project-manager-db";
+import * as ProjectManagerDb from "project-manager-entities/project-manager-db";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV == 'LOCAL' ? '.local.env' : '.env',
-    }),
     TypeOrmModule.forRootAsync({
       name: process.env.DB_NAME,
       useFactory: () => ({
@@ -20,7 +19,14 @@ import * as ProjectManagerDb from "project-manager-db";
         database: process.env.DB_NAME,
         entities: ProjectManagerDb as any,
         synchronize: false,
-      })
+      }),
+      async dataSourceFactory(options) {
+	       if (!options) {
+	         throw new Error('Invalid options passed');
+	       }
+
+	       return addTransactionalDataSource(new DataSource(options));
+	     },
     }),
   ],
 })
