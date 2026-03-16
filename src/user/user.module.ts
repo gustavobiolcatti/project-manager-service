@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
-import { User } from "project-manager-db";
+import { User } from "project-manager-entities/project-manager-db";
 
 import { UserRepository } from "./repositories/user.repository";
 import { UserService } from "./services/user.service";

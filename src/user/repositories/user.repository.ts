@@ -2,7 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
-import { User } from "project-manager-db";
+
+import { CreateUserDto } from "user/models/createUser.dto";
+
+import { User } from "project-manager-entities/project-manager-db";
+
 
 @Injectable()
 export class UserRepository {
@@ -16,13 +20,50 @@ export class UserRepository {
       private readonly userRepository: Repository<User>,
   ) {}
 
-  async findUsers() {
+  createUserInstance(createUserDto: CreateUserDto): User {
+    return this.userRepository.create(createUserDto);
+  }
+
+  async saveUser(user: User): Promise<string> {
+    try {
+      const savedUser = await this.userRepository.save(user);
+
+      return savedUser.id;
+    } catch (error) {
+      console.error({
+        ...this.DEFAULT_LOG_OBJECT,
+        function: this.saveUser.name,
+        error,
+      })
+
+      throw error;
+    }
+  }
+
+  async findUsers(): Promise<User[]> {
     try {
       return this.userRepository.find();
     } catch (error) {
       console.error({
         ...this.DEFAULT_LOG_OBJECT,
         function: this.findUsers.name,
+        error,
+      })
+
+      throw error;
+    }
+  }
+
+  async getUserForLogin(email: string): Promise<User | null> {
+    try {
+      return await this.userRepository.findOne({
+        select: ['name', 'email', 'password'], 
+        where: { email },
+      });
+    } catch (error) {
+      console.error({
+        ...this.DEFAULT_LOG_OBJECT,
+        function: this.getUserForLogin.name,
         error,
       })
 
