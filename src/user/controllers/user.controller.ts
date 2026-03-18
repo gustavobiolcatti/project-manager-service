@@ -1,9 +1,17 @@
-import { Body, Controller, Get, HttpStatus, Inject, Post } from "@nestjs/common";
-
-import { UserService } from "../services/user.service";
-import { CreateUserDto } from "user/models/createUser.dto";
+import { 
+  Body, 
+  Controller, 
+  Get, 
+  Headers, 
+  HttpStatus, 
+  Inject, 
+  Post 
+} from "@nestjs/common";
 import { Transactional } from "typeorm-transactional";
-import { LoginDTO } from "user/models/login.dto";
+
+import { UserService } from "user/services/user.service";
+import { CreateUserDto } from "user/dtos/create-user.dto";
+import { DefaultReturnDto } from "shared/dtos/default-return.dto";
 
 @Controller('users')
 export class UserController {
@@ -20,31 +28,16 @@ export class UserController {
   @Post('/register')
   @Transactional({ connectionName: process.env.DB_NAME })
   async createUser(
-    @Body() 
-    userData: CreateUserDto
-  ) {
+    @Headers() _header: Record<string, string>,
+    @Body() userData: CreateUserDto
+  ): Promise<DefaultReturnDto> {
     const createdUserId = await this.userService.createUser(userData);
 
     return { 
       status: HttpStatus.CREATED, 
+      message: 'User created successfully',
       data: {
         userId: createdUserId
-      }
-    };
-  }
-
-  @Post('/login')
-  async login(
-    @Body()
-    loginData: LoginDTO
-  ) {
-    const user = await this.userService.login(loginData);
-
-    return { 
-      status: HttpStatus.OK,
-      data: {
-        name: user?.name,
-        email: user?.email,
       }
     };
   }

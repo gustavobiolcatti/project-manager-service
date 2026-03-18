@@ -3,8 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 
 
-import { CreateUserDto } from "user/models/createUser.dto";
-
 import { User } from "project-manager-entities/project-manager-db";
 
 
@@ -20,8 +18,8 @@ export class UserRepository {
       private readonly userRepository: Repository<User>,
   ) {}
 
-  createUserInstance(createUserDto: CreateUserDto): User {
-    return this.userRepository.create(createUserDto);
+  createUserInstance(user: Partial<User>): User {
+    return this.userRepository.create(user);
   }
 
   async saveUser(user: User): Promise<string> {
